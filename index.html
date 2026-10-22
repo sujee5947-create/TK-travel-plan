@@ -41,10 +41,14 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="saveToCloudManual()" class="bg-white hover:bg-slate-50 text-emerald-600 border border-emerald-200 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-xs transition active:scale-95" title="현재 일정을 클라우드에 안전하게 저장">
+            <!-- 구글 시트 불러오기 버튼 추가 -->
+            <button onclick="loadFromGoogleSheet()" class="bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-xs transition active:scale-95" title="구글 스프레드시트에서 최신 일정 불러오기">
+                <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">시트 불러오기</span>
+            </button>
+            <button onclick="saveToCloudManual()" class="bg-white hover:bg-slate-50 text-emerald-600 border border-emerald-200 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-xs transition active:scale-95" title="현재 일정을 저장">
                 <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden sm:inline">저장</span>
             </button>
-            <button onclick="openShareModal()" class="bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-200 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-xs transition active:scale-95" title="친구들과 링크 공유 및 실시간 협업">
+            <button onclick="openShareModal()" class="bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-200 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-xs transition active:scale-95" title="링크 공유">
                 <i class="fa-solid fa-share-nodes"></i> <span class="hidden sm:inline">공유</span>
             </button>
             <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm shadow-indigo-100 transition active:scale-95">
@@ -128,9 +132,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">시작 시간</label>
                         <div class="flex gap-1.5">
-                            <select id="startHourInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <!-- Dynamically populated hours -->
-                            </select>
+                            <select id="startHourInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
                             <select id="startMinuteInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <option value="00">00분</option>
                                 <option value="10">10분</option>
@@ -144,9 +146,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">종료 시간</label>
                         <div class="flex gap-1.5">
-                            <select id="endHourInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <!-- Dynamically populated hours -->
-                            </select>
+                            <select id="endHourInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
                             <select id="endMinuteInput" required class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <option value="00">00분</option>
                                 <option value="10">10분</option>
@@ -228,19 +228,19 @@
         </div>
     </div>
 
-    <!-- Share & Collaboration Modal -->
+    <!-- Share Modal -->
     <div id="shareModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-600"></i> 실시간 협업 링크 공유
+                    <i class="fa-solid fa-users text-indigo-600"></i> 링크 공유
                 </h3>
                 <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-full flex items-center justify-center bg-slate-50 transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <p class="text-xs text-slate-500 mb-4">
-                이 링크를 공유하면 누구든지 접속하여 일정을 자유롭게 추가, 수정하고 실시간으로 함께 업데이트할 수 있습니다!
+                이 링크를 공유하면 누구든지 접속하여 일정을 자유롭게 확인하고 업데이트할 수 있습니다!
             </p>
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-slate-600 mb-1">공동 편집 링크</label>
@@ -248,12 +248,6 @@
                     <input type="text" id="shareLinkInput" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-600 focus:outline-none">
                     <button onclick="copyShareLink()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-xs shrink-0 transition">링크 복사</button>
                 </div>
-            </div>
-            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-4 text-xs text-indigo-900 flex items-center justify-between">
-                <span id="syncStatusText" class="font-semibold flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-check text-emerald-500"></i> 실시간 공동 편집 활성화됨
-                </span>
-                <span id="userIdDisplay" class="font-mono text-[10px] opacity-70">ID: 로딩중...</span>
             </div>
             <div class="flex items-center justify-end">
                 <button onclick="closeShareModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition">확인</button>
@@ -291,102 +285,191 @@
         let isSyncing = false;
         const LOCAL_STORAGE_KEY = "smart_travel_planner_data_v1";
 
+        // Google Sheet ID 연동 설정
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1MFGH98ulNj9bNaFN5eyNUYbCwjGfk5hg15B_7tCzppw/export?format=csv";
+
         // Comprehensive gourmet database
         const gourmetDatabase = [
             { keyword: 'shinjuku', name: '이치란 신주쿠점 (Ichiran)', rating: '4.6', time: '도보 5분', snippet: '진한 돈코츠 라멘과 특제 비밀소스가 일품인 24시간 맛집', location: 'Shinjuku City, Tokyo' },
             { keyword: 'shinjuku', name: '규카츠 모토무라 신주쿠점', rating: '4.8', time: '도보 8분', snippet: '화로에 직접 구워 먹는 부드러운 소고기 규카츠 전문점', location: 'Shinjuku 3-chome, Tokyo' },
             { keyword: 'shinjuku', name: '오모이데요코초 꼬치구이거리', rating: '4.3', time: '도보 10분', snippet: '레트로한 분위기 속에서 즐기는 야키토리와 생맥주', location: 'Omoide Yokocho, Shinjuku' },
-            { keyword: 'shinjuku', name: '뉴욕 그릴 (Park Hyatt)', rating: '4.7', time: '도보 12분', snippet: '영화 로케이션으로 유명한 도쿄 야경 명품 스테이크하우스', location: 'Park Hyatt Tokyo, Shinjuku' },
-            { keyword: 'shinjuku', name: '후우운사 (Fuunji)', rating: '4.5', time: '도보 7분', snippet: '걸쭉하고 진한 해물 닭뼈 육수의 츠케멘 최강자', location: 'Yoyogi, Shibuya City, Tokyo' },
-            { keyword: 'shinjuku', name: '나베조 신주쿠 (Nabezo)', rating: '4.4', time: '도보 6분', snippet: '신선한 야채와 고기를 무제한으로 즐기는 샤브샤브', location: 'Shinjuku 3-chome, Tokyo' },
-            { keyword: 'shinjuku', name: '블루보틀 커피 신주쿠', rating: '4.4', time: '도보 9분', snippet: '스페셜티 커피와 깔끔한 인테리어가 돋보이는 카페', location: 'Shinjuku, Tokyo' },
-            { keyword: 'shinjuku', name: '사쿠라테이쇼쿠', rating: '4.5', time: '도보 11분', snippet: '정갈한 일본 가정식 백반과 생선구이 정식', location: 'Shinjuku, Tokyo' },
-
             { keyword: 'shibuya', name: '미후네 스시 시부야', rating: '4.7', time: '도보 3분', snippet: '신선한 제철 네타로 만든 장인 초밥 오마카세', location: 'Shibuya City, Tokyo' },
-            { keyword: 'shibuya', name: '시부야 스크램블 스퀘어 모닝글로리', rating: '4.5', time: '도보 2분', snippet: '탁 트인 전망과 함께 즐기는 브런치 카페', location: 'Shibuya Scramble Square' },
-            { keyword: 'shibuya', name: '우메가오카 미도리스시', rating: '4.6', time: '도보 6분', snippet: '항상 웨이팅이 있는 가성비 최고의 최고급 스시', location: 'Mark City Shibuya, Tokyo' },
-            { keyword: 'shibuya', name: '카츠하리키 시부야', rating: '4.5', time: '도보 5분', snippet: '겉바속촉 육즙 가득한 프리미엄 돈카츠', location: 'Shibuya, Tokyo' },
-            { keyword: 'shibuya', name: '스타벅스 리저브 로스터리 도쿄', rating: '4.6', time: '도보 15분', snippet: '세계 최대 규모의 로스터리 카페와 베이커리', location: 'Nakameguro, Tokyo' },
-            { keyword: 'shibuya', name: '멘야 무사시 무코우', rating: '4.4', time: '도보 8분', snippet: '두툼한 차슈와 진한 감칠맛의 라멘', location: 'Shibuya, Tokyo' },
-            { keyword: 'shibuya', name: '카페 마고치', rating: '4.3', time: '도보 10분', snippet: '조용하고 아늑한 분위기의 수제 디저트 카페', location: 'Shibuya, Tokyo' },
-            { keyword: 'shibuya', name: '시부야 교자', rating: '4.2', time: '도보 4분', snippet: '바삭하게 구워낸 육즙 가득 교자와 맥주 조합', location: 'Shibuya, Tokyo' },
-
             { keyword: 'harajuku', name: '하라주쿠교자루', rating: '4.4', time: '도보 4분', snippet: '겉은 바삭하고 속은 촉촉한 명물 군만두 전문점', location: 'Jingumae, Shibuya City, Tokyo' },
-            { keyword: 'harajuku', name: '마리오네트 크레페', rating: '4.5', time: '도보 2분', snippet: '달콤한 과일과 생크림이 가득 들어간 하라주쿠 디저트', location: 'Takeshita St, Harajuku' },
-            { keyword: 'harajuku', name: '레인보우 팬케이크', rating: '4.6', time: '도보 7분', snippet: '폭신하고 부드러운 수제 수플레 팬케이크', location: 'Jingumae, Tokyo' },
-            { keyword: 'harajuku', name: '우마미 버거 오모테산도', rating: '4.4', time: '도보 9분', snippet: '풍부한 감칠맛의 패티가 매력적인 수제 버거', location: 'Omotesando, Tokyo' },
-            { keyword: 'harajuku', name: '키르 페 봉 그랑메종', rating: '4.7', time: '도보 6분', snippet: '신선한 과일 타르트가 유명한 디저트 명가', location: 'Omotesando, Tokyo' },
-            { keyword: 'harajuku', name: '아후리 라멘 하라주쿠', rating: '4.5', time: '도보 5분', snippet: '상큼한 유자 향이 은은하게 퍼지는 깔끔한 시오라멘', location: 'Harajuku, Tokyo' },
-            { keyword: 'harajuku', name: '토니가야 오모테산도', rating: '4.3', time: '도보 8분', snippet: '도심 속 정원 뷰를 자랑하는 테라스 카페', location: 'Omotesando, Tokyo' },
-            { keyword: 'harajuku', name: '레드락 하라주쿠점', rating: '4.4', time: '도보 4분', snippet: '로스트비프가 산더미처럼 쌓인 덮밥 맛집', location: 'Harajuku, Tokyo' },
-
             { keyword: 'asakusa', name: '아사쿠사 몬자야키 오코게', rating: '4.5', time: '도보 3분', snippet: '철판에서 직접 구워 먹는 고소한 전통 몬자야키', location: 'Asakusa, Taito City, Tokyo' },
-            { keyword: 'asakusa', name: '나카미세도리 기비단고', rating: '4.6', time: '도보 1분', snippet: '달콤한 콩가루가 묻은 쫄깃한 전통 경단', location: 'Senso-ji, Asakusa' },
-            { keyword: 'asakusa', name: '스미다 리버사이드 카페', rating: '4.4', time: '도보 5분', snippet: '스미다강과 도쿄스카이트리가 한눈에 보이는 뷰 맛집', location: 'Asakusa, Tokyo' },
-            { keyword: 'asakusa', name: '아사쿠사 우나토토', rating: '4.5', time: '도보 4분', snippet: '부담 없는 가격에 즐기는 숯불 장어덮밥 (우나돈)', location: 'Asakusa, Tokyo' },
-            { keyword: 'asakusa', name: '다이코쿠야 덴푸라', rating: '4.4', time: '도보 6분', snippet: '120년 전통의 진한 텐푸라와 텐동 전문점', location: 'Asakusa, Tokyo' },
-            { keyword: 'asakusa', name: '카미나리몬 카페', rating: '4.3', time: '도보 2분', snippet: '말차 라떼와 일본 전통 화과자를 즐길 수 있는 곳', location: 'Asakusa, Tokyo' },
-            { keyword: 'asakusa', name: '규카츠 아사쿠사', rating: '4.7', time: '도보 5분', snippet: '바삭하게 튀겨낸 소고기를 화로에 익혀 먹는 별미', location: 'Asakusa, Tokyo' },
-            { keyword: 'asakusa', name: '아사쿠사 멘치', rating: '4.5', time: '도보 3분', snippet: '육즙이 폭발하는 바삭한 수제 멘치카츠', location: 'Asakusa, Tokyo' },
-
-            { keyword: 'general', name: '도쿄 스테이션 키친', rating: '4.5', time: '도보 2분', snippet: '다양한 역세권 맛집과 도시락을 한곳에서 만나는 곳', location: 'Tokyo Station' },
-            { keyword: 'general', name: '긴자 바이린 본점', rating: '4.6', time: '도보 5분', snippet: '역사와 전통을 자랑하는 히레카츠의 명가', location: 'Ginza, Chuo City, Tokyo' },
-            { keyword: 'general', name: '츠키지 장외시장 스시잔마이', rating: '4.4', time: '도보 8분', snippet: '싱싱한 참치와 해산물 초밥을 즐기는 시장 맛집', location: 'Tsukiji, Tokyo' },
-            { keyword: 'general', name: '도쿄 블루보틀 롯폰기', rating: '4.5', time: '도보 6분', snippet: '세련된 건축 디자인과 최고급 원두 커피', location: 'Roppongi, Tokyo' },
-            { keyword: 'general', name: '오다큐 로맨스카 카페', rating: '4.3', time: '도보 3분', snippet: '여행의 피로를 녹여주는 부드러운 핸드드립 커피', location: 'Shinjuku Station' },
-            { keyword: 'general', name: '이세텐 백화점 디저트 스트리트', rating: '4.7', time: '도보 4분', snippet: '세계 각국의 최고급 베이커리와 화과자 집결지', location: 'Shinjuku, Tokyo' },
-            { keyword: 'general', name: '하라주쿠 타케시타 크레페', rating: '4.4', time: '도보 3분', snippet: '달콤한 생크림과 아이스크림이 가득한 길거리 간식', location: 'Harajuku, Tokyo' },
-            { keyword: 'general', name: '신주쿠 교엔 야외 카페', rating: '4.6', time: '도보 10분', snippet: '아름다운 정원 풍경 속에서 즐기는 힐링 티타임', location: 'Shinjuku Gyoen' }
+            { keyword: 'general', name: '긴자 바이린 본점', rating: '4.6', time: '도보 5분', snippet: '역사와 전통을 자랑하는 히레카츠의 명가', location: 'Ginza, Chuo City, Tokyo' }
         ];
 
-        // Default initial itinerary data (3박 4일 도쿄 여행)
+        // Default Itinerary Data
         let daysData = [
             {
-                day: 1,
-                date: "11월 1일 (일)",
-                items: [
-                    { id: 'i1', startTime: '10:00', endTime: '11:30', category: 'transport', title: '나리타 공항 도착 및 입국 심사', location: 'Narita International Airport, Terminal 1', memo: '비행기 하기 후 나리타 익스프레스(N\'EX) 탑승권 교환', transportMode: '', transportTime: '' },
-                    { id: 'i2', startTime: '12:00', endTime: '13:30', category: 'hotel', title: '호텔 그레이스리 신주쿠 체크인 및 짐 맡기기', location: 'Hotel Gracery Shinjuku', memo: '고질라 헤드가 있는 신주쿠 중심가 숙소', transportMode: 'transit', transportTime: '공항철도 직통열차: 55분 (¥2,500)' },
-                    { id: 'i3', startTime: '14:00', endTime: '15:30', category: 'food', title: '이치란 신주쿠점에서 진한 돈코츠 라멘 점심', location: 'Ichiran Shinjuku', memo: '비법 소스 5배, 면 익힘 보통 추천', transportMode: 'walk', transportTime: '도보 6분 (450m)' },
-                    { id: 'i4', startTime: '16:00', endTime: '18:30', category: 'sightseeing', title: '신주쿠 교엔 가을 단풍 산책 및 힐링', location: 'Shinjuku Gyoen National Garden', memo: '입장료 성인 ¥500, 넓은 정원에서 휴식', transportMode: 'walk', transportTime: '도보 12분 (900m)' },
-                    { id: 'i5', startTime: '19:00', endTime: '21:00', category: 'food', title: '오모이데요코초 야키토리 거리 저녁 식사', location: 'Omoide Yokocho Shinjuku', memo: '꼬치구이와 생맥주로 첫날 일정 마무리', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 14분 (¥180)' }
+                "day": 1,
+                "date": "11월 1일 (일)",
+                "items": [
+                    { "id": "item_1792582142856", "startTime": "14:00", "endTime": "16:00", "category": "transport", "title": "나리타 공항 도착 숙소 이동", "location": "Narita International Airport, Terminal 1", "memo": "간단 간식?", "transportMode": "", "transportTime": "" },
+                    { "id": "item_1792587153813", "startTime": "16:00", "endTime": "17:15", "category": "hotel", "title": "크로스 스위트 아사쿠사 체크인", "location": "크로스 스위트 아사쿠사", "memo": "숙소 체크인", "transportMode": "transit", "transportTime": "공항철도 N'EX 직통: 55분 (¥2,500)" },
+                    { "id": "item_1792587271823", "startTime": "17:15", "endTime": "18:30", "category": "food", "title": "아사쿠사 규카츠", "location": "아사쿠사 규카츠", "memo": "", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" },
+                    { "id": "item_1792587410101", "startTime": "18:30", "endTime": "19:45", "category": "sightseeing", "title": "전망대", "location": "아사쿠사 문화관광센터", "memo": "무료 야경명소", "transportMode": "transit", "transportTime": "대중교통(지하철): 14분 (¥190)" },
+                    { "id": "item_1792587466210", "startTime": "19:45", "endTime": "21:00", "category": "sightseeing", "title": "센소지", "location": "2 Chome-3-1 Asakusa, Taito City, Tokyo 111-0032 일본", "memo": "관광", "transportMode": "transit", "transportTime": "대중교통(지하철): 14분 (¥190)" },
+                    { "id": "item_1792587524109", "startTime": "21:00", "endTime": "22:15", "category": "food", "title": "몬자야끼", "location": "아사쿠사몬쟈 젠야", "memo": "몬자야키", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" }
                 ]
             },
             {
-                day: 2,
-                date: "11월 2일 (월)",
-                items: [
-                    { id: 'i6', startTime: '09:30', endTime: '12:00', category: 'sightseeing', title: '메이지 신궁 고즈넉한 숲길 산책', location: 'Meiji Jingu Shrine Tokyo', memo: '도심 속 거대한 숲과 도리이 관람', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 15분 (¥170)' },
-                    { id: 'i7', startTime: '12:30', endTime: '14:00', category: 'food', title: '하라주쿠교자루에서 바삭한 군만두 점심', location: 'Harajuku Gyozaro', memo: '마늘/부추 선택 가능한 가성비 만두 맛집', transportMode: 'walk', transportTime: '도보 9분 (700m)' },
-                    { id: 'i8', startTime: '14:15', endTime: '17:00', category: 'shopping', title: '시부야 스크램블 스퀘어 & 전망대 방문', location: 'Shibuya Scramble Square', memo: '사전 예약한 시부야 스카이에서 도쿄 전경 조망', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 12분 (¥160)' },
-                    { id: 'i9', startTime: '17:30', endTime: '19:30', category: 'food', title: '규카츠 모토무라 시부야에서 저녁 식사', location: 'Gyukatsu Motomura Shibuya', memo: '개인 화로에 구워 먹는 고소한 규카츠 정식', transportMode: 'walk', transportTime: '도보 5분 (350m)' }
+                "day": 2,
+                "date": "11월 2일 (월)",
+                "items": [
+                    { "id": "item_1792587645245", "startTime": "07:50", "endTime": "07:50", "category": "hotel", "title": "기상", "location": "크로스 스위트 아사쿠사", "memo": "펜케잌 웨이팅", "transportMode": "", "transportTime": "" },
+                    { "id": "item_1792587972501", "startTime": "07:50", "endTime": "11:00", "category": "food", "title": "베니즈루 팬케잌 웨이팅/ 9시30분 입장", "location": "베니즈루", "memo": "", "transportMode": "transit", "transportTime": "대중교통(지하철): 14분 (¥190)" },
+                    { "id": "item_1792587987709", "startTime": "11:30", "endTime": "12:30", "category": "food", "title": "아점 장어덮밥", "location": "izumo asakusa yokocho", "memo": "장어덮밥", "transportMode": "transit", "transportTime": "대중교통(지하철): 14분 (¥190)" },
+                    { "id": "item_1792588002677", "startTime": "12:30", "endTime": "21:30", "category": "sightseeing", "title": "디즈니랜드", "location": "도쿄 디즈니랜드", "memo": "디즈니랜드", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" }
                 ]
             },
             {
-                day: 3,
-                date: "11월 3일 (화)",
-                items: [
-                    { id: 'i10', startTime: '10:00', endTime: '12:30', category: 'sightseeing', title: '아사쿠사 센소지 및 나미세도리 탐방', location: 'Senso-ji Asakusa Tokyo', memo: '도쿄에서 가장 오래된 사찰, 오미쿠지 뽑기 체험', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 28분 (¥310)' },
-                    { id: 'i11', startTime: '12:45', endTime: '14:00', category: 'food', title: '아사쿠사 우나토토에서 장어덮밥 점심', location: 'Unatoto Asakusa', memo: '합리적인 가격으로 즐기는 숯불 장어덮밥', transportMode: 'walk', transportTime: '도보 4분 (300m)' },
-                    { id: 'i12', startTime: '14:30', endTime: '17:00', category: 'shopping', title: '아키하바라 전자상가 및 애니메이션 굿즈 쇼핑', location: 'Akihabara Electric Town', memo: '피규어 및 최신 전자기기 구경', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 18분 (¥210)' },
-                    { id: 'i13', startTime: '17:30', endTime: '20:00', category: 'food', title: '긴자 명품거리 구경 및 스시 오마카세 저녁', location: 'Ginza Tokyo', memo: '화려한 긴자 야경과 함께하는 프리미엄 스시', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 16분 (¥210)' }
+                "day": 3,
+                "date": "11월 3일 (화)",
+                "items": [
+                    { "id": "item_1792588170549", "startTime": "08:30", "endTime": "09:00", "category": "hotel", "title": "기상", "location": "크로스 스위트 아사쿠사", "memo": "시부야로", "transportMode": "", "transportTime": "" },
+                    { "id": "item_1792588292876", "startTime": "10:00", "endTime": "11:00", "category": "food", "title": "시부야 이치란", "location": "이치란 시부야점", "memo": "라멘 아점", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" },
+                    { "id": "item_1792588352276", "startTime": "11:00", "endTime": "14:30", "category": "sightseeing", "title": "신주쿠 스크램블", "location": "신주쿠 스크램블", "memo": "신주쿠 스크램블 -> 카페 아무데나", "transportMode": "transit", "transportTime": "대중교통(지하철): 14분 (¥190)" },
+                    { "id": "item_1792588962764", "startTime": "14:30", "endTime": "18:00", "category": "sightseeing", "title": "신주쿠 쇼핑 & 카페 & 구경 & 스시로 웨이팅 걸기", "location": "이세탄 신주쿠", "memo": "신주쿠 & 이세탄", "transportMode": "walk", "transportTime": "도보 9분 (720m)" },
+                    { "id": "item_1792588987164", "startTime": "18:00", "endTime": "19:30", "category": "food", "title": "스시로", "location": "일본 〒160-0022 Tokyo, Shinjuku City, Shinjuku, 3", "memo": "", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" },
+                    { "id": "item_1792589071324", "startTime": "19:30", "endTime": "23:30", "category": "sightseeing", "title": "돈키호테", "location": "돈키호테 아사쿠사점", "memo": "돈키호테 쇼핑", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" }
                 ]
             },
             {
-                day: 4,
-                date: "11월 4일 (수)",
-                items: [
-                    { id: 'i14', startTime: '10:00', endTime: '11:30', category: 'sightseeing', title: '신주쿠 중앙공원 산책 및 기념품 쇼핑', location: 'Shinjuku Chuo Park', memo: '여행 마지막 날 여유로운 산책과 드럭스토어 쇼핑', transportMode: 'transit', transportTime: '대중교통(지하철/버스): 12분 (¥180)' },
-                    { id: 'i15', startTime: '12:00', endTime: '13:30', category: 'food', title: '후우운사 츠케멘으로 마지막 도쿄 미식 즐기기', location: 'Fuunji Shinjuku', memo: '진한 어묵/닭육수 츠케멘', transportMode: 'walk', transportTime: '도보 7분 (500m)' },
-                    { id: 'i16', startTime: '14:00', endTime: '16:30', category: 'transport', title: '나리타 공항 이동 및 출국 수속', location: 'Narita International Airport', memo: 'N\'EX 열차 탑승 및 면세점 쇼핑 후 귀국', transportMode: 'transit', transportTime: '공항철도 직통열차: 55분 (¥2,500)' }
+                "day": 4,
+                "date": "11월 4일 (수)",
+                "items": [
+                    { "id": "item_1792589322372", "startTime": "09:00", "endTime": "09:30", "category": "hotel", "title": "기상", "location": "크로스 스위트 아사쿠사", "memo": "마지막날", "transportMode": "", "transportTime": "" },
+                    { "id": "item_1792589417876", "startTime": "09:30", "endTime": "11:00", "category": "transport", "title": "나리타 국제공항", "location": "나리타 국제공항", "memo": "공항 면세 & 식사 14시 출국", "transportMode": "transit", "transportTime": "대중교통(버스/전철): 21분 (¥230)" }
                 ]
             }
         ];
 
+        // --- Google Sheet Sync Function ---
+        async function loadFromGoogleSheet() {
+            try {
+                showToast("구글 시트에서 데이터를 불러오는 중...");
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) throw new Error("시트 데이터를 가져오지 못했습니다.");
+                const csvText = await response.text();
+                
+                // Parse CSV (Handling commas and quotes safely)
+                const rows = [];
+                let row = [];
+                let inQuotes = false;
+                let current = '';
+                
+                for (let i = 0; i < csvText.length; i++) {
+                    const char = csvText[i];
+                    const nextChar = csvText[i+1];
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') { current += '"'; i++; }
+                        else { inQuotes = !inQuotes; }
+                    } else if ((char === ',' || char === '\t') && !inQuotes) {
+                        row.push(current.trim());
+                        current = '';
+                    } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                        if (char === '\r' && nextChar === '\n') { i++; }
+                        row.push(current.trim());
+                        if (row.length > 1 || row[0] !== '') rows.push(row);
+                        row = [];
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                if (current !== '' || row.length > 0) {
+                    row.push(current.trim());
+                    if (row.length > 1 || row[0] !== '') rows.push(row);
+                }
+
+                if (rows.length <= 1) {
+                    alert("구글 시트에 데이터가 없거나 형식이 올바르지 않습니다.");
+                    return;
+                }
+
+                // Header check
+                const headers = rows[0].map(h => h.toLowerCase());
+                const dayIdx = headers.findIndex(h => h.includes('day'));
+                const startIdx = headers.findIndex(h => h.includes('starttime'));
+                const endIdx = headers.findIndex(h => h.includes('endtime'));
+                const catIdx = headers.findIndex(h => h.includes('category'));
+                const titleIdx = headers.findIndex(h => h.includes('title'));
+                const locIdx = headers.findIndex(h => h.includes('location'));
+                const memoIdx = headers.findIndex(h => h.includes('memo'));
+
+                const newDaysMap = {};
+
+                for (let i = 1; i < rows.length; i++) {
+                    const r = rows[i];
+                    if (r.length < 5) continue;
+                    
+                    const dayNum = parseInt(dayIdx >= 0 ? r[dayIdx] : r[0], 10) || 1;
+                    const startTime = startIdx >= 0 ? r[startIdx] : (r[1] || "10:00");
+                    const endTime = endIdx >= 0 ? r[endIdx] : (r[2] || "11:00");
+                    const category = catIdx >= 0 ? r[catIdx] : (r[3] || "sightseeing");
+                    const title = titleIdx >= 0 ? r[titleIdx] : (r[4] || "");
+                    const location = locIdx >= 0 ? r[locIdx] : (r[5] || "");
+                    const memo = memoIdx >= 0 ? r[memoIdx] : (r[6] || "");
+
+                    if (!title) continue;
+
+                    if (!newDaysMap[dayNum]) {
+                        newDaysMap[dayNum] = [];
+                    }
+
+                    newDaysMap[dayNum].push({
+                        id: 'item_' + Date.now() + Math.random(),
+                        startTime: startTime,
+                        endTime: endTime,
+                        category: category,
+                        title: title,
+                        location: location,
+                        memo: memo,
+                        transportMode: 'transit',
+                        transportTime: ''
+                    });
+                }
+
+                const updatedDaysData = [];
+                const sortedDayKeys = Object.keys(newDaysMap).map(Number).sort((a,b) => a - b);
+                
+                sortedDayKeys.forEach((dNum, idx) => {
+                    const baseDate = new Date(tripStartDate);
+                    baseDate.setDate(baseDate.getDate() + idx);
+                    const m = baseDate.getMonth() + 1;
+                    const d = baseDate.getDate();
+                    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+                    const dayOfWeek = daysOfWeek[baseDate.getDay()];
+                    
+                    updatedDaysData.push({
+                        day: dNum,
+                        date: `${m}월 ${d}일 (${dayOfWeek})`,
+                        items: newDaysMap[dNum]
+                    });
+                });
+
+                if (updatedDaysData.length > 0) {
+                    daysData = updatedDaysData;
+                    activeDayIndex = 0;
+                    selectedItemIndex = 0;
+                    renderDayTabs();
+                    await renderActiveDayContent();
+                    saveToCloud();
+                    showToast("구글 시트의 최신 일정을 성공적으로 불러왔습니다!");
+                } else {
+                    alert("불러올 수 있는 유효한 일정이 없습니다.");
+                }
+
+            } catch (e) {
+                console.error("Google Sheet load error:", e);
+                alert("구글 시트를 불러오지 못했습니다. 스프레드시트가 '링크가 있는 모든 사용자에게 공개(웹에 게시)'되어 있는지 확인해주세요.");
+            }
+        }
+
         // --- Real Google Maps Directions Matrix Simulation / API Lookup ---
         async function fetchRealTransitTime(prevLoc, currLoc) {
             if (!prevLoc || !currLoc) return null;
-            
             const p = prevLoc.toLowerCase();
             const c = currLoc.toLowerCase();
             
@@ -460,7 +543,6 @@
                     }
 
                     userId = auth.currentUser?.uid || crypto.randomUUID();
-                    document.getElementById('userIdDisplay').textContent = `ID: ${userId.substring(0, 8)}...`;
                     document.getElementById('shareLinkInput').value = window.location.href;
 
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'itinerary_state');
@@ -505,20 +587,10 @@
                                 saveToLocalStorage();
                             }
                         }
-                    }, (err) => {
-                        console.error("Cloud sync listener error:", err);
                     });
-
-                } else {
-                    document.getElementById('syncStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 로컬 모드 (브라우저 저장)`;
-                    document.getElementById('userIdDisplay').textContent = `ID: Local`;
-                    document.getElementById('shareLinkInput').value = window.location.href;
                 }
             } catch (e) {
-                console.log("Running in standalone local storage mode:", e);
-                document.getElementById('syncStatusText').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 로컬 모드 (오프라인 안전 저장)`;
-                document.getElementById('userIdDisplay').textContent = `ID: Local`;
-                document.getElementById('shareLinkInput').value = window.location.href;
+                console.log("Local storage fallback mode");
             }
         };
 
@@ -531,19 +603,15 @@
                     daysData: daysData,
                     updatedAt: new Date().toISOString()
                 }));
-            } catch (e) {
-                console.error("Failed to save to local storage:", e);
-            }
+            } catch (e) {}
         }
 
         async function saveToCloud() {
             saveToLocalStorage();
-
             if (!db) {
-                showToast("로컬 브라우저에 안전하게 저장되었습니다.");
+                showToast("저장되었습니다.");
                 return;
             }
-
             try {
                 isSyncing = true;
                 const { doc, setDoc } = window.firebaseModules;
@@ -557,11 +625,10 @@
                     updatedBy: userId
                 });
                 setTimeout(() => { isSyncing = false; }, 500);
-                showToast("클라우드 및 로컬에 일정이 정상 저장되었습니다!");
+                showToast("저장되었습니다!");
             } catch (e) {
-                console.error("Failed to save to cloud, falling back to local storage:", e);
                 isSyncing = false;
-                showToast("로컬 저장소에 저장되었습니다.");
+                showToast("저장되었습니다.");
             }
         }
 
@@ -800,7 +867,7 @@
             }
         }
 
-        // --- Render Sequential Route Flow Banner (Synchronized with Map & Card) ---
+        // --- Render Sequential Route Flow Banner ---
         function renderDailyRouteFlow(items) {
             const flowContainer = document.getElementById('dailyRouteFlow');
             const routeCountBadge = document.getElementById('routeCountBadge');
@@ -1141,7 +1208,7 @@
             }
         }
 
-        // Expose critical functions globally
+        // Expose functions globally
         window.openEditTripTitleModal = openEditTripTitleModal;
         window.closeEditTripTitleModal = closeEditTripTitleModal;
         window.saveTripTitle = saveTripTitle;
@@ -1160,6 +1227,7 @@
         window.focusLocationOnMap = focusLocationOnMap;
         window.focusDirectionsOnMap = focusDirectionsOnMap;
         window.viewFullResultTransit = viewFullRouteTransit;
+        window.loadFromGoogleSheet = loadFromGoogleSheet;
     </script>
 </body>
 </html>
